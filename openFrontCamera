@@ -1,0 +1,36 @@
+// #ifdef APP-PLUS
+function openFrontCamera(needVideo = false) {
+  try {
+    // 1. 获取摄像头（部分机型这里拿不到真正的前置，但必须写）
+    const camera = plus.camera.getCamera(1); 
+    if (!camera) throw new Error("前置不可用");
+
+    const opt = {
+      format: 'jpg',
+      index: '2',        // 核心：强制前置
+      optimize: true,
+      filename: '_doc/front_' + Date.now() + (needVideo ? '.mp4' : '.jpg')
+    };
+
+    if (needVideo) {
+      // 【拍视频】部分机型录像对 index 支持更好
+      camera.startVideoCapture((path) => {
+        console.log('前置视频路径:', path);
+        // 这里调你的上传接口
+      }, (err) => {
+        console.log('视频失败:', err);
+      }, { ...opt, format: 'mp4', duration: 10 }); // duration 秒
+    } else {
+      // 【拍图片】
+      camera.captureImage((path) => {
+        console.log('前置图片路径:', path);
+        handleSuccess(path);
+      }, (err) => {
+        handleFailure(err);
+      }, opt);
+    }
+  } catch (e) {
+    handleFailure(e);
+  }
+}
+// #endif
